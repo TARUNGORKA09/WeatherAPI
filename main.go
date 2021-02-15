@@ -1,12 +1,11 @@
 package main
 
 import (
-	"encoding/json"
 	"fmt"
-	"net/http"
 	"log"
+	"net/http"
 	"os"
-	"github.com/TARUNGORKA09/WeatherAPI/weatherData"
+
 	"github.com/TARUNGORKA09/WeatherAPI/Handler"
 	"github.com/gorilla/mux"
 )
@@ -17,11 +16,11 @@ func main() {
 
 	l := log.New(os.Stdout, "Mobile Todo", log.LstdFlags)
 
-	mobile := Handlers.NewWeather(l)
+	mobile := Handler.NewWeather(l)
 	sm := mux.NewRouter()
 
 	getRouter := sm.Methods(http.MethodGet).Subrouter()
-	getRouter.HandleFunc("/getMobile/{id:[0-9]+}", mobile.GetMobileInfo)
+	getRouter.HandleFunc("/getWeather", mobile.GetWeather)
 
 	http.ListenAndServe(":8080", sm)
 

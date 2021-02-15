@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"log"
 	"net/http"
+	"net/url"
 
 	"github.com/TARUNGORKA09/WeatherAPI/weatherData"
 )
@@ -19,31 +20,43 @@ func NewWeather(m *log.Logger) *WeatherInfo {
 
 func (data WeatherInfo) GetWeather(rw http.ResponseWriter, r *http.Request) {
 
-	defer r.Body.Close()
-	var location weatherData.Location
-	err := json.NewDecoder(r.Body).Decode(&location)
-	if err != nil {
-		fmt.Printf("Invalid Location")
-	}
-	long := location.Long
-	lati := location.Lat
-	lon := fmt.Sprintf("%f", long)
-	lat := fmt.Sprintf("%s", lati)
-	res, err := http.NewRequest("GET", "https://api.openweathermap.org/data/2.5/weather", nil)
-	q := res.URL.Query()
+	//defer r.Body.Close()
+	long, lati, err := parser(r)
+	lon := fmt.Sprintf("%g", long)
+	lat := fmt.Sprintf("%g", lati)
+	req, err := url.Parse("https://api.openweathermap.org/data/2.5/weather")
+	q := url.Values{}
 	q.Add("lat", lat)
 	q.Add("lon", lon)
 	q.Add("appid", "cec178f08a0a71980085edd7163c6e29")
+	req.RawQuery = q.Encode()
 	if err != nil {
 		fmt.Fprintf(rw, " ", err)
 	}
+	res, err := http.Get(req.String())
 	defer res.Body.Close()
 	var data1 weatherData.WeatherData
 	err = json.NewDecoder(res.Body).Decode(&data1)
 	if err != nil {
 		fmt.Println("unable to decode full Data")
 	}
-	fmt.Fprintf(rw, "Weather :", data1.Weather)
-	fmt.Fprintf(rw, "Base :", data1.Base)
-	fmt.Fprintf(rw, "TimeZone :", data1.Timezone)
+	fmt.Fprintln(rw, "Weather :", data1.Weather)
+	fmt.Fprintln(rw, "Base :", data1.Base)
+	fmt.Fprintln(rw, "Name:", data1.Name)
+	fmt.Fprintln(rw, "TimeZone :", data1.Timezone)
+	fmt.Fprintln(rw, "ID :", data1.ID)
+}
+
+func parser(r *http.Request) (float64, float64, error) {
+
+	var location weatherData.Location
+	defer r.Body.Close()
+	err := json.NewDecoder(r.Body).Decode(&location)
+	if err != nil {
+		fmt.Printf("Invalid Location")
+	}
+	long := location.Long
+	lati := location.Lat
+
+	return long, lati, nil
 }
