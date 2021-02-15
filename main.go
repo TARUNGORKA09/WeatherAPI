@@ -1,18 +1,28 @@
 package main
 
 import (
+	"encoding/json"
 	"fmt"
 	"net/http"
+	"log"
+	"os"
+	"github.com/TARUNGORKA09/WeatherAPI/weatherData"
+	"github.com/TARUNGORKA09/WeatherAPI/Handler"
+	"github.com/gorilla/mux"
 )
 
 func main() {
 
-	url := "https://api.openweathermap.org/data/2.5/weather?lat=35&lon=139&appid=cec178f08a0a71980085edd7163c6e29"
+	fmt.Println("Server is starting ................")
 
-	res, err := http.Get(url)
-	if err != nil {
-		fmt.Printf("Unable to get Weather data")
-	}
-	defer res.Body.Close()
+	l := log.New(os.Stdout, "Mobile Todo", log.LstdFlags)
+
+	mobile := Handlers.NewWeather(l)
+	sm := mux.NewRouter()
+
+	getRouter := sm.Methods(http.MethodGet).Subrouter()
+	getRouter.HandleFunc("/getMobile/{id:[0-9]+}", mobile.GetMobileInfo)
+
+	http.ListenAndServe(":8080", sm)
 
 }

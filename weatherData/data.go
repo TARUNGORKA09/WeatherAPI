@@ -42,3 +42,8 @@ type WeatherData struct {
 	Name     string `json:"name"`
 	Cod      int    `json:"cod"`
 }
+
+type Location struct {
+	Long float64 `json:"long"`
+	Lat  float64 `json:"lat"`
+}
